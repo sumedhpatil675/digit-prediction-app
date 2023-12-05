@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digit-prediction-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digit-prediction-app
+  template:
+    metadata:
+      labels:
+        app: digit-prediction-app
+    spec:
+      containers:
+      - name: digit-prediction-app
+        image: sumedhpatil675/digit_prediction:latest  # Replace with your Docker image details
+        ports:
+        - containerPort: 80
