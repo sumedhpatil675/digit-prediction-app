@@ -10,18 +10,45 @@
 <body>
     <h1>MNIST Digit Prediction</h1>
 
-    <form method="post" action="/predict" enctype="multipart/form-data">
-        <label for="file">Upload an image:</label>
-        <input type="file" id="file" name="file" accept=".png, .jpg, .jpeg" required>
-        <button type="submit">Predict</button>
-    </form>
+    <hr>
 
-    {% if error is defined %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+    <input type="file" id="apiFile" accept=".png, .jpg, .jpeg" required>
+    <button onclick="predictWithAPI()">Predict with API</button>
 
-    {% if prediction is defined %}
-        <h2>Prediction: {{ prediction }}</h2>
-    {% endif %}
+    <p id="apiPrediction"></p>
+
+    <script>
+        function predictWithAPI() {
+            var fileInput = document.getElementById('apiFile');
+            var file = fileInput.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var image = e.target.result.split(',')[1];  // Extract base64-encoded image
+                    makeApiRequest(image);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function makeApiRequest(image) {
+            fetch('/api/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: image }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('apiPrediction').innerText = 'API Prediction: ' + data.prediction;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('apiPrediction').innerText = 'Error predicting with API';
+            });
+        }
+    </script>
 </body>
 </html>
