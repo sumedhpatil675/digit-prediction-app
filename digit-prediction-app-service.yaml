@@ -1,3 +1,4 @@
+## digit-prediction-app-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,4 +10,3 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
-  type: LoadBalancer  # Use "LoadBalancer" for cloud environments with external load balancers

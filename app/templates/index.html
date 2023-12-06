@@ -32,6 +32,10 @@
         function predictWithAPI() {
             var fileInput = document.getElementById('apiFile');
             var file = fileInput.files[0];
+            console.log("fileInput",fileInput)
+            console.log("file",file)
+            var file_name = file.name
+
 
             if (file) {
                 var reader = new FileReader();
@@ -42,19 +46,19 @@
 
                     // Make API request
                     var image = e.target.result.split(',')[1];  // Extract base64-encoded image
-                    makeApiRequest(image);
+                    makeApiRequest(image,file_name);
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        function makeApiRequest(image) {
+        function makeApiRequest(image,file_name) {
             fetch('/api/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ image: image }),
+                body: JSON.stringify({ image: image, file_name: file_name }),
             })
             .then(response => response.json())
             .then(data => {

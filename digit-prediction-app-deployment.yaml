@@ -1,3 +1,5 @@
+## digit-prediction-app-deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +16,6 @@ spec:
     spec:
       containers:
       - name: digit-prediction-app
-        image: sumedhpatil675/digit_prediction:latest  # Replace with your Docker image details
+        image: sumedhpatil675/digit_prediction:latest
         ports:
         - containerPort: 80
