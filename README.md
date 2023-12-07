@@ -75,7 +75,7 @@ app.py, create_and_train_model.py, Dockerfile and requirements.txt file
 
 
 
-Steps for Starting Applications
+Steps for Starting Application
 ----------------------------------
 
 
