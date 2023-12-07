@@ -76,7 +76,7 @@ app.py, create_and_train_model.py, Dockerfile and requirements.txt file
 
 
 Steps for Starting Applications
-======================================
+----------------------------------
 
 
 1. Install required depedencies
