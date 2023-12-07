@@ -1,26 +1,37 @@
-## mysql-deployment.yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: mysql-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: mysql-db
   template:
     metadata:
       labels:
-        app: mysql
+        app: mysql-db
     spec:
       containers:
-      - name: mysql
+      - name: mysql-db
         image: mysql:latest
+        ports:
+        - containerPort: 3306
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: password
         - name: MYSQL_DATABASE
           value: prediction_db
-        ports:
-        - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
