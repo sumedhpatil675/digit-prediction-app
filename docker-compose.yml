@@ -1,0 +1,29 @@
+version: '3'
+services:
+  flask-app:
+    build: ./app
+    ports:
+      - "80:80"
+    depends_on:
+      - mysql-db
+    environment:
+      - MYSQL_HOST=mysql-db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=password
+      - MYSQL_DB=prediction_db
+    networks:
+      - myflaskapp_default
+
+  mysql-db:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: prediction_db
+    networks:
+      - myflaskapp_default
+
+networks:
+  myflaskapp_default:
+    external: true

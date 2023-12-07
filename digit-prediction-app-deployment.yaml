@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digit-prediction-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digit-prediction-app
+  template:
+    metadata:
+      labels:
+        app: digit-prediction-app
+    spec:
+      containers:
+      - name: digit-prediction-app
+        image: sumedhpatil675/digit_prediction:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: MYSQL_HOST
+          value: mysql-service
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DB
+          value: prediction_db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: digit-prediction-app-service
+spec:
+  selector:
+    app: digit-prediction-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

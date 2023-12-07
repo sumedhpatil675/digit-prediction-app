@@ -1,0 +1,73 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Prediction</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-lg bg-white p-8 rounded-md shadow-md">
+        <h1 class="text-2xl font-bold mb-6">MNIST Digit Prediction</h1>
+
+        <hr class="my-8">
+
+        <input type="file" id="apiFile" accept=".png, .jpg, .jpeg" required
+               class="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300">
+        <button onclick="predictWithAPI()"
+                class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Predict</button>
+
+        <p id="apiPrediction" class="mt-4 text-lg font-semibold"></p>
+
+        <div id="uploadedImageContainer" class="mt-8 hidden">
+            <h2 class="text-xl font-semibold mb-4">Uploaded Image</h2>
+            <img id="uploadedImage" class="max-w-full rounded-md" alt="Uploaded Image">
+        </div>
+    </div>
+
+    <script>
+        function predictWithAPI() {
+            var fileInput = document.getElementById('apiFile');
+            var file = fileInput.files[0];
+            console.log("fileInput",fileInput)
+            console.log("file",file)
+            var file_name = file.name
+
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    // Display the uploaded image
+                    document.getElementById('uploadedImage').src = e.target.result;
+                    document.getElementById('uploadedImageContainer').classList.remove('hidden');
+
+                    // Make API request
+                    var image = e.target.result.split(',')[1];  // Extract base64-encoded image
+                    makeApiRequest(image,file_name);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function makeApiRequest(image,file_name) {
+            fetch('/api/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: image, file_name: file_name }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('apiPrediction').innerText = 'API Prediction: ' + data.prediction;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('apiPrediction').innerText = 'Error predicting with API';
+            });
+        }
+    </script>
+</body>
+</html>
