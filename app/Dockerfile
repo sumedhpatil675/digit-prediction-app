@@ -1,12 +1,9 @@
 ## Dockerfile app
 
-# Use an official TensorFlow runtime as a parent image
 FROM tensorflow/tensorflow:latest
 
-# Set the working directory to /app
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
 COPY . /app
 
 # Install system dependencies for Pillow
@@ -21,5 +18,5 @@ RUN pip install mysql-connector-python
 
 EXPOSE 80
 
-# Run the app.py when the container launches
-CMD ["python", "app.py"]
+# Run the create_and_train_model then app.py when the container launches
+CMD ["python", "create_and_train_model.py", "app.py"]

@@ -1,124 +1,122 @@
-# ai_task
+Structure of our app
+-------------------------
+
+Our project will consist app, mysql directory
 
 
-docker build -t my-flask-app .
+app/ -
+This directory will consist of directories models,templates and files 
+app.py, create_and_train_model.py, Dockerfile and requirements.txt file
 
-docker run -p 4000:80 my-flask-app
+  app.py 
+  -----------------------
 
-docker exec -it 65e22e3af53c /bin/bash
+  This file will be starting point of our application. It will take care of rendering homepage. i.e index.html
 
+  It also contains a code for /predict api with mannaging connection with mysql db also insertion of prediction result in mysql db.
 
-Deploy kubenetes 
-==========================
-kubectl apply -f digit-prediction-app-deployment.yaml  
-kubectl apply -f digit-prediction-app-service.yaml
-kubectl apply -f mysql-deployment.yaml
-
-
+  This prediction will done based on mnist_model.h5 file which we loaded initially at the start of our application.
 
 
+  create_and_train_model.py
+  -------------------------
 
-Access the Application:
+    1 . Loading and Preprocessing Data:
 
-Check the status of your Deployment:
-
-----------------------------------------
-kubectl get pods
-----------------------------------------
-
-
-Once the pod is running, get the URL to access your application:
-
-----------------------------------------
-kubectl get services
-----------------------------------------
+    It loads the MNIST dataset using TensorFlow's mnist.load_data() function.
+    The pixel values of the images are normalized to the range [0, 1] by dividing them by 255.
+    The dataset is reshaped to have a single channel (as it is grayscale).
 
 
-Look for the EXTERNAL-IP of your service. If it's pending, wait for it to get an external IP (this might take a minute).
+    2 . Defining the Model:
 
-Open your web browser and access the application using the external IP and port 80.
+    It defines a convolutional neural network (CNN) model using TensorFlow's Keras API.
+    The model consists of a convolutional layer with 32 filters, each of size (3, 3) and using the ReLU activation function.
+    It includes a max-pooling layer to down-sample the spatial dimensions.
+    The data is then flattened and passed through a dense layer with 10 units and a softmax activation function, suitable for multi-class classification (MNIST has 10 classes).
 
-Cleanup:
+    3 . Compiling the Model:
 
-When you're done, you can delete the resources:
+    The model is compiled with the Adam optimizer, sparse categorical crossentropy loss (appropriate for integer labels like in MNIST), and accuracy as the evaluation metric.
 
---------------------------------------------------
-kubectl delete deployment digit-prediction-app
-kubectl delete service digit-prediction-app-service
---------------------------------------------------
+    4 . Training the Model:
 
+    The model is trained using the training images and labels.
+    The training is performed for 5 epochs, and validation data (from the test set) is used to evaluate the model's performance during training.
+    Saving the Trained Model:
 
-This should get your Flask application running on Kubernetes using Docker Desktop. If you face any issues, check the logs and describe the pods and services for more 
+    After training, the script saves the trained model in the Hierarchical Data Format version 5 (HDF5) file format with the filename 'mnist_model.h5'. The model can be later loaded for inference without retraining.
 
+  Dockerfile
+  ---------------------------
 
+  - It uses the latest TensorFlow base image.
+  - Sets the working directory to /app.
+  - Copies application files into the container.
+  - Installs system dependencies for Pillow (image processing library).
+  - Installs Python dependencies from requirements.txt.
+  - Installs the MySQL Connector Python library.
+  - Exposes port 80 (documentation purpose).
+  - Specifies that the default command to run is python app.py when the container starts.
 
-
-
-
-to build the digit-prediction-app localy
-============================================
-
-docker build --no-cache -t sumedhpatil675/digit_prediction:latest .
-
-
-docker push sumedhpatil675/digit_prediction:latest
-
-
-to expose digit-prediction-app-service  to port 8080
-=============================================
-kubectl port-forward service/digit-prediction-app-service 8080:80
-
-
-to acces docker mysql using kubectl
-===================================
-
-kubectl exec -it mysql-78d67b4567-4w522 -- /bin/bash
-
-Replace <your-pod-id> with the actual identifier of your MySQL pod. You can find the pod ID using the kubectl get pods command.
-
-Once you are inside the MySQL container, you can use the mysql command to access the MySQL client:
-
-============================================
-mysql -u root -p
-============================================
+  requirements.txt
+  ---------------------------
+  It will contain all the dependencies required for this project.
 
 
-Enter the MySQL root password when prompted.
 
-After entering the MySQL client, switch to the prediction_db database:
+  models/mnist_model.h5
+  ----------------------------
+  This will contain model file, which will used to predict the result.
 
-============================================
-USE prediction_db;
-============================================
-
-Query the predictions table:
-
-============================================
-SELECT * FROM predictions;
-============================================
+  templates/index.html
+  ----------------------------
+  Its homepage of our application , it will consist of html,javascript code for rendering file uploading functionallity also javascript code for hitting /predict api
 
 
-It seems like there's an issue with the code formatting. If you're trying to run MySQL and Flask containers in the same Docker network, you can follow these steps:
 
-Create a Docker network:
-
-=============================================
-docker network create my_network
-=============================================
+Steps for Starting Applications
+======================================
 
 
-Run MySQL container and connect it to the network:
+1. Install required depedencies
 
-=============================================
-docker run --name mysql-container --network my_network -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=prediction_db -d mysql:latest
-=============================================
+First go to app folder, and type command
 
+pip install -r requirements.txt
 
-Run Flask container and connect it to the network. Make sure to replace /path/to/models, /path/to/templates, and /path/to/app with the actual paths on your local machine:
-
-=============================================
-docker run --name digit-prediction-app-container --network my_network -p 80:80 -v models:/app/models -v templates:/app/templates -v app:/app digit_prediction:latest
-=============================================
+This will install all the libraries required for project.
 
 
-This assumes that you have built a Docker image for your Flask app with the tag flask-app:latest. Adjust the image name accordingly based on how you've tagged your Flask app image.
+
+
+
+3. Start our application
+
+  1. Using docker-compose
+
+       1. To start application using docker-compose we can use command
+        - docker-compose up --build
+
+          This will create a docker container for prediction app and mysql and run starting files of the containers. i.e create_and_train_model.py and app.py
+
+        
+       2. create_and_train_model.py
+        will create a mnist_model.h5 model file in models directory. Which we will use in our /predict api for result prediction.
+        
+
+       3. Then you can access our app using below url
+            Type below url in your browser and press enter
+            - localhost
+
+   2. Using kubernetes
+        1. Start kubernetes clusters
+        - kubectl apply -f digit-prediction-app-deployment.yaml  
+        - kubectl apply -f mysql-deployment.yaml
+
+         These commands will deploy two different components (a digit prediction application and a MySQL database) to a Kubernetes cluster by applying their respective YAML configurations.
+
+        2. Accessing the application
+         
+         Type below url in your browser and press enter
+            - localhost
